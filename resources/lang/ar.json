@@ -1,0 +1,224 @@
+{
+    "Dashboard": "لوحة التحكم",
+    "POS / Checkout": "نقطة البيع / الدفع",
+    "Sales": "المبيعات",
+    "Products": "المنتجات",
+    "Categories": "الفئات",
+    "Inventory": "المخزون",
+    "Purchases": "المشتريات",
+    "Suppliers": "الموردون",
+    "Customers": "العملاء",
+    "Discounts": "الخصومات",
+    "Expenses": "المصروفات",
+    "Reports": "التقارير",
+    "Admin": "الإدارة",
+    "Users": "المستخدمون",
+    "Branches": "الفروع",
+    "Settings": "الإعدادات",
+    "Collapse": "طي القائمة",
+    "No Branch": "بدون فرع",
+    "Profile": "الملف الشخصي",
+    "Sign Out": "تسجيل الخروج",
+    "Language": "اللغة",
+    "Professional Point of Sale System": "نظام نقاط بيع احترافي",
+    "Sign in to your account": "سجل الدخول إلى حسابك",
+    "Email Address": "البريد الإلكتروني",
+    "Password": "كلمة المرور",
+    "Remember me": "تذكرني",
+    "Sign In": "تسجيل الدخول",
+    "All rights reserved.": "جميع الحقوق محفوظة.",
+    "General Settings": "الإعدادات العامة",
+    "Sales Report": "تقرير المبيعات",
+    "Reports Dashboard": "لوحة التقارير",
+    "Profit & Loss": "الأرباح والخسائر",
+    "Inventory Report": "تقرير المخزون",
+    "Purchase Orders": "أوامر الشراء",
+    "Discounts & Coupons": "الخصومات والكوبونات",
+    "My Profile": "ملفي الشخصي",
+    "Inventory Movements": "حركات المخزون",
+    "Your account has been deactivated. Please contact an administrator.": "تم تعطيل حسابك. يرجى التواصل مع المسؤول.",
+    "English": "English",
+    "Arabic": "العربية",
+    "Scan barcode...": "امسح الباركود...",
+    "Search products by name, SKU, barcode...": "ابحث عن المنتجات بالاسم أو SKU أو الباركود...",
+    "Stock": "المخزون",
+    "Unlimited": "غير محدود",
+    "Customer": "العميل",
+    "Remove": "إزالة",
+    "pts": "نقطة",
+    "Search customer...": "ابحث عن عميل...",
+    "Cart": "السلة",
+    "item": "عنصر",
+    "items": "عناصر",
+    "each": "للوحدة",
+    "Cart is empty": "السلة فارغة",
+    "Coupon code": "رمز الكوبون",
+    "Apply": "تطبيق",
+    "Automatic discount applied to eligible cart items.": "تم تطبيق الخصم التلقائي على عناصر السلة المؤهلة.",
+    "Subtotal": "الإجمالي الفرعي",
+    "Discount": "الخصم",
+    "Tax": "الضريبة",
+    "Total": "الإجمالي",
+    "Charge :amount": "تحصيل :amount",
+    "Payment": "الدفع",
+    "Amount Due": "المبلغ المستحق",
+    "Payment Method": "طريقة الدفع",
+    "Cash": "نقدًا",
+    "Card": "بطاقة",
+    "Cash Tendered": "المبلغ المستلم",
+    "Change": "الباقي",
+    "Notes (optional)": "ملاحظات (اختياري)",
+    "Order notes...": "ملاحظات الطلب...",
+    "Complete Sale": "إتمام البيع",
+    "Sale Complete!": "اكتملت عملية البيع!",
+    "Print receipt": "طباعة الإيصال",
+    "New Sale": "بيع جديد",
+    ":points loyalty points earned": "تم كسب :points نقطة ولاء",
+    "Insufficient stock for :product": "المخزون غير كافٍ للمنتج :product",
+    ":product is out of stock": "المنتج :product غير متوفر في المخزون",
+    "Cannot exceed available stock (:stock)": "لا يمكن تجاوز المخزون المتاح (:stock)",
+    "Invalid or expired coupon code.": "رمز الكوبون غير صالح أو منتهي الصلاحية.",
+    "Coupon applied: :name": "تم تطبيق الكوبون: :name",
+    "Coupon is valid, but no eligible items in the current cart match it yet.": "الكوبون صالح، لكن لا توجد عناصر مؤهلة في السلة الحالية حتى الآن.",
+    "Insufficient cash tendered": "المبلغ النقدي المستلم غير كافٍ"
+    ,"Settings saved successfully.": "تم حفظ الإعدادات بنجاح."
+    ,"No active branch is assigned to your account, so branch settings could not be saved.": "لا يوجد فرع نشط مرتبط بحسابك، لذلك تعذر حفظ إعدادات الفرع."
+    ,"Application Name": "اسم التطبيق"
+    ,"Used across the app shell, login page, and POS receipt.": "يُستخدم في واجهة التطبيق وصفحة الدخول وإيصال نقطة البيع."
+    ,"Currency": "العملة"
+    ,"Second Currency": "العملة الثانية"
+    ,"None": "بدون"
+    ,"Shown in POS totals alongside the main currency.": "تظهر في إجماليات نقطة البيع إلى جانب العملة الأساسية."
+    ,"Exchange Rate": "سعر الصرف"
+    ,"How many units of the second currency equal 1 unit of the main currency.": "كم وحدة من العملة الثانية تساوي وحدة واحدة من العملة الأساسية."
+    ,"Default Tax Rate (%)": "معدل الضريبة الافتراضي (%)"
+    ,"Receipt Footer Message": "رسالة تذييل الإيصال"
+    ,"Loyalty Program": "برنامج الولاء"
+    ,"Enable Loyalty Points": "تفعيل نقاط الولاء"
+    ,"Points per Dollar Spent": "عدد النقاط لكل دولار يتم إنفاقه"
+    ,"Applied when a customer is attached to a completed sale.": "يتم تطبيقه عندما يكون البيع المكتمل مرتبطًا بعميل."
+    ,"Save Settings": "حفظ الإعدادات"
+    ,"Search branches...": "ابحث عن الفروع..."
+    ,"Add Branch": "إضافة فرع"
+    ,"Name": "الاسم"
+    ,"Code": "الرمز"
+    ,"City": "المدينة"
+    ,"Phone": "الهاتف"
+    ,"Users": "المستخدمون"
+    ,"Status": "الحالة"
+    ,"Actions": "الإجراءات"
+    ,"Active": "نشط"
+    ,"Inactive": "غير نشط"
+    ,"No branches found.": "لم يتم العثور على فروع."
+    ,"Edit Branch": "تعديل الفرع"
+    ,"New Branch": "فرع جديد"
+    ,"Branch Name": "اسم الفرع"
+    ,"e.g. MAIN": "مثال: MAIN"
+    ,"Email": "البريد الإلكتروني"
+    ,"Address": "العنوان"
+    ,"Receipt Footer": "تذييل الإيصال"
+    ,"Thank you for your business!": "شكرًا لتعاملكم معنا!"
+    ,"Cancel": "إلغاء"
+    ,"Save": "حفظ"
+    ,"Delete Branch?": "حذف الفرع؟"
+    ,"This cannot be undone.": "لا يمكن التراجع عن هذا الإجراء."
+    ,"Delete": "حذف"
+    ,"Branch saved.": "تم حفظ الفرع."
+    ,"Branch cannot be deleted because sales, expenses, or purchase orders are linked to it.": "لا يمكن حذف الفرع لوجود مبيعات أو مصروفات أو أوامر شراء مرتبطة به."
+    ,"Branch deleted.": "تم حذف الفرع."
+    ,"Search customers...": "ابحث عن العملاء..."
+    ,"Add Customer": "إضافة عميل"
+    ,"Points": "النقاط"
+    ,"No customers found.": "لم يتم العثور على عملاء."
+    ,"Edit Customer": "تعديل العميل"
+    ,"New Customer": "عميل جديد"
+    ,"Full Name": "الاسم الكامل"
+    ,"Birthday": "تاريخ الميلاد"
+    ,"Delete Customer?": "حذف العميل؟"
+    ,"Customer saved.": "تم حفظ العميل."
+    ,"Customer deleted.": "تم حذف العميل."
+    ,"Search suppliers...": "ابحث عن الموردين..."
+    ,"Add Supplier": "إضافة مورد"
+    ,"Company": "الشركة"
+    ,"No suppliers found.": "لم يتم العثور على موردين."
+    ,"Edit Supplier": "تعديل المورد"
+    ,"New Supplier": "مورد جديد"
+    ,"Supplier Name": "اسم المورد"
+    ,"Delete Supplier?": "حذف المورد؟"
+    ,"Supplier updated.": "تم تحديث المورد."
+    ,"Supplier created.": "تم إنشاء المورد."
+    ,"Supplier cannot be deleted because purchase orders are linked to it.": "لا يمكن حذف المورد لوجود أوامر شراء مرتبطة به."
+    ,"Supplier deleted.": "تم حذف المورد."
+    ,"Manual adjustment": "تعديل يدوي"
+    ,"Stock adjusted successfully.": "تم تعديل المخزون بنجاح."
+    ,"Sale #:reference cancelled.": "تم إلغاء عملية البيع رقم :reference."
+    ,"Search product or SKU...": "ابحث عن منتج أو SKU..."
+    ,"All Branches": "كل الفروع"
+    ,"All Categories": "كل الفئات"
+    ,"All Stock": "كل المخزون"
+    ,"In Stock": "متوفر"
+    ,"Low Stock": "مخزون منخفض"
+    ,"Out of Stock": "غير متوفر"
+    ,"Product": "المنتج"
+    ,"Branch": "الفرع"
+    ,"Qty": "الكمية"
+    ,"Reorder Level": "حد إعادة الطلب"
+    ,"Adjust Stock": "تعديل المخزون"
+    ,"No inventory records found.": "لم يتم العثور على سجلات مخزون."
+    ,"Adjustment Type": "نوع التعديل"
+    ,"Add Stock": "إضافة مخزون"
+    ,"Remove Stock": "سحب مخزون"
+    ,"Set Exact Quantity": "تحديد الكمية بدقة"
+    ,"Quantity": "الكمية"
+    ,"Note": "ملاحظة"
+    ,"Reason for adjustment...": "سبب التعديل..."
+    ,"Invoice # or customer...": "رقم الفاتورة أو العميل..."
+    ,"All Statuses": "كل الحالات"
+    ,"Completed": "مكتمل"
+    ,"Cancelled": "ملغي"
+    ,"Refunded": "مرتجع"
+    ,"Invoice": "الفاتورة"
+    ,"Date": "التاريخ"
+    ,"Walk-in": "عميل مباشر"
+    ,"Are you sure you want to void this sale?": "هل أنت متأكد من إلغاء هذه العملية؟"
+    ,"Void Sale": "إلغاء البيع"
+    ,"No sales found.": "لم يتم العثور على مبيعات."
+    ,"PO # or supplier...": "رقم أمر الشراء أو المورد..."
+    ,"All Suppliers": "كل الموردين"
+    ,"Draft": "مسودة"
+    ,"Sent": "مرسل"
+    ,"Partial": "جزئي"
+    ,"Received": "مستلم"
+    ,"New PO": "أمر شراء جديد"
+    ,"PO #": "رقم أمر الشراء"
+    ,"Supplier": "المورد"
+    ,"No purchase orders found.": "لم يتم العثور على أوامر شراء."
+    ,"Today": "اليوم"
+    ,"Yesterday": "أمس"
+    ,"Week": "الأسبوع"
+    ,"Month": "الشهر"
+    ,"Year": "السنة"
+    ,"Total Revenue": "إجمالي الإيرادات"
+    ,"Avg Order": "متوسط الطلب"
+    ,"Net Profit": "صافي الربح"
+    ,"30-Day Revenue Trend": "اتجاه الإيرادات خلال 30 يومًا"
+    ,"Detailed transactions": "المعاملات التفصيلية"
+    ,"Stock levels & value": "مستويات المخزون والقيمة"
+    ,"Revenue vs expenses": "الإيرادات مقابل المصروفات"
+    ,"Search categories...": "ابحث عن الفئات..."
+    ,"Add Category": "إضافة فئة"
+    ,"Parent": "الأصل"
+    ,"No categories found.": "لم يتم العثور على فئات."
+    ,"Edit Category": "تعديل الفئة"
+    ,"New Category": "فئة جديدة"
+    ,"Category name": "اسم الفئة"
+    ,"Parent Category": "الفئة الأصل"
+    ,"— None —": "— لا يوجد —"
+    ,"Description": "الوصف"
+    ,"Color": "اللون"
+    ,"Delete Category?": "حذف الفئة؟"
+    ,"Child categories will be moved to the parent level.": "سيتم نقل الفئات الفرعية إلى المستوى الأعلى."
+    ,"Category updated successfully.": "تم تحديث الفئة بنجاح."
+    ,"Category created successfully.": "تم إنشاء الفئة بنجاح."
+    ,"Category deleted successfully.": "تم حذف الفئة بنجاح."
+}
