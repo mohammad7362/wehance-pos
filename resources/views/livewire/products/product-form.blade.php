@@ -44,6 +44,7 @@
                         <option value="{{ $category->id }}">{{ $category->name }}</option>
                     @endforeach
                 </select>
+                @error('category_id') <p class="form-error">{{ $message }}</p> @enderror
             </div>
 
             <div>
@@ -54,6 +55,7 @@
                         <option value="{{ $unit->id }}">{{ $unit->name }} ({{ $unit->abbreviation }})</option>
                     @endforeach
                 </select>
+                @error('unit_id') <p class="form-error">{{ $message }}</p> @enderror
             </div>
 
             <div>
@@ -64,6 +66,7 @@
                         <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
                     @endforeach
                 </select>
+                @error('supplier_id') <p class="form-error">{{ $message }}</p> @enderror
             </div>
 
             <div>

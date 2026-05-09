@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\Supplier;
 use App\Models\Unit;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -93,87 +94,95 @@ class ProductForm extends Component
     {
         $this->validate();
 
-        $data = [
-            'name' => $this->name,
-            'description' => $this->description ?: null,
-            'barcode' => $this->barcode ?: null,
-            'sku' => $this->sku ?: null,
-            'category_id' => $this->category_id,
-            'unit_id' => $this->unit_id,
-            'supplier_id' => $this->supplier_id,
-            'cost_price' => $this->cost_price,
-            'selling_price' => $this->selling_price,
-            'tax_rate' => $this->tax_rate,
-            'min_stock_alert' => $this->min_stock_alert,
-            'pieces_per_box' => $this->pieces_per_box !== '' ? (int) $this->pieces_per_box : null,
-            'track_inventory' => $this->track_inventory,
-            'is_active' => $this->is_active,
-        ];
+        try {
+            $data = [
+                'name' => $this->name,
+                'description' => $this->description ?: null,
+                'barcode' => $this->barcode ?: null,
+                'sku' => $this->sku ?: null,
+                'category_id' => $this->category_id,
+                'unit_id' => $this->unit_id,
+                'supplier_id' => $this->supplier_id,
+                'cost_price' => $this->cost_price,
+                'selling_price' => $this->selling_price,
+                'tax_rate' => $this->tax_rate,
+                'min_stock_alert' => $this->min_stock_alert,
+                'track_inventory' => $this->track_inventory,
+                'is_active' => $this->is_active,
+            ];
 
-        if ($this->image) {
-            $data['image'] = $this->image->store('products', 'public');
-        }
+            if (Schema::hasColumn('products', 'pieces_per_box')) {
+                $data['pieces_per_box'] = $this->pieces_per_box !== '' ? (int) $this->pieces_per_box : null;
+            }
 
-        if ($this->isEdit && $this->product) {
-            if ($this->product->name !== $this->name) {
+            if ($this->image) {
+                $data['image'] = $this->image->store('products', 'public');
+            }
+
+            if ($this->isEdit && $this->product) {
+                if ($this->product->name !== $this->name) {
+                    $slug = Str::slug($this->name);
+                    if (Product::where('slug', $slug)->where('id', '!=', $this->product->id)->exists()) {
+                        $slug .= '-' . $this->product->id;
+                    }
+                    $data['slug'] = $slug;
+                }
+                $this->product->update($data);
+                session()->flash('success', 'Product updated successfully.');
+            } else {
                 $slug = Str::slug($this->name);
-                if (Product::where('slug', $slug)->where('id', '!=', $this->product->id)->exists()) {
-                    $slug .= '-' . $this->product->id;
+                if (Product::where('slug', $slug)->exists()) {
+                    $slug .= '-' . time();
                 }
                 $data['slug'] = $slug;
-            }
-            $this->product->update($data);
-            session()->flash('success', 'Product updated successfully.');
-        } else {
-            $slug = Str::slug($this->name);
-            if (Product::where('slug', $slug)->exists()) {
-                $slug .= '-' . time();
-            }
-            $data['slug'] = $slug;
-            $product = Product::create($data);
+                $product = Product::create($data);
 
-            // Seed initial stock / always create inventory row for branch
-            $branchId = Auth::user()?->branch_id
-                ?? \App\Models\Branch::where('is_active', true)->value('id');
+                // Seed initial stock / always create inventory row for branch
+                $branchId = Auth::user()?->branch_id
+                    ?? \App\Models\Branch::where('is_active', true)->value('id');
 
-            if ($branchId) {
-                $piecesPerBox = max(1, (int) ($product->pieces_per_box ?? 1));
-                $boxes  = max(0, (int) $this->initial_boxes);
-                $pieces = max(0, (int) $this->initial_pieces);
-                $totalQty = $product->track_inventory ? ($boxes * $piecesPerBox) + $pieces : 0;
+                if ($branchId) {
+                    $piecesPerBox = max(1, (int) ($product->pieces_per_box ?? 1));
+                    $boxes  = max(0, (int) $this->initial_boxes);
+                    $pieces = max(0, (int) $this->initial_pieces);
+                    $totalQty = $product->track_inventory ? ($boxes * $piecesPerBox) + $pieces : 0;
 
-                $inventory = Inventory::firstOrCreate([
-                        'product_id' => $product->id,
-                        'product_variant_id' => null,
-                        'branch_id' => $branchId,
-                    ], [
-                        'quantity' => 0,
-                    ]);
+                    $inventory = Inventory::firstOrCreate([
+                            'product_id' => $product->id,
+                            'product_variant_id' => null,
+                            'branch_id' => $branchId,
+                        ], [
+                            'quantity' => 0,
+                        ]);
 
-                $beforeQty = (float) ($inventory->quantity ?? 0);
+                    $beforeQty = (float) ($inventory->quantity ?? 0);
 
-                if ($totalQty > 0) {
-                    $inventory->increment('quantity', $totalQty);
-                    $afterQty = $beforeQty + $totalQty;
+                    if ($totalQty > 0) {
+                        $inventory->increment('quantity', $totalQty);
+                        $afterQty = $beforeQty + $totalQty;
 
-                    InventoryMovement::create([
-                        'product_id' => $product->id,
-                        'product_variant_id' => null,
-                        'branch_id' => $branchId,
-                        'user_id' => Auth::id(),
-                        'type' => 'initial',
-                        'quantity' => $totalQty,
-                        'quantity_before' => $beforeQty,
-                        'quantity_after' => $afterQty,
-                        'notes' => 'Initial stock (' . $this->initial_boxes . ' boxes + ' . $this->initial_pieces . ' pieces)',
-                    ]);
+                        InventoryMovement::create([
+                            'product_id' => $product->id,
+                            'product_variant_id' => null,
+                            'branch_id' => $branchId,
+                            'user_id' => Auth::id(),
+                            'type' => 'initial',
+                            'quantity' => $totalQty,
+                            'quantity_before' => $beforeQty,
+                            'quantity_after' => $afterQty,
+                            'notes' => 'Initial stock (' . $this->initial_boxes . ' boxes + ' . $this->initial_pieces . ' pieces)',
+                        ]);
+                    }
                 }
+
+                session()->flash('success', 'Product created successfully.');
             }
 
-            session()->flash('success', 'Product created successfully.');
+            $this->redirectRoute('products.index');
+        } catch (\Throwable $e) {
+            report($e);
+            session()->flash('error', 'Product could not be saved. If this is production, run migrations and clear caches.');
         }
-
-        $this->redirectRoute('products.index');
     }
 
     public function render()
