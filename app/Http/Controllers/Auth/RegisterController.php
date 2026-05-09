@@ -16,6 +16,25 @@ use Spatie\Permission\Models\Role;
 
 class RegisterController extends Controller
 {
+    /**
+     * Permissions required by sidebar and route gates.
+     */
+    private const DEFAULT_PERMISSIONS = [
+        'view dashboard',
+        'view products', 'create products', 'edit products', 'delete products',
+        'view categories', 'create categories', 'edit categories', 'delete categories',
+        'view inventory', 'adjust inventory',
+        'view sales', 'create sales', 'refund sales', 'delete sales',
+        'view purchases', 'create purchases', 'edit purchases', 'receive purchases',
+        'view customers', 'create customers', 'edit customers', 'delete customers',
+        'view suppliers', 'create suppliers', 'edit suppliers', 'delete suppliers',
+        'view discounts', 'create discounts', 'edit discounts', 'delete discounts',
+        'view reports',
+        'view expenses', 'create expenses', 'edit expenses', 'delete expenses',
+        'view users', 'create users', 'edit users', 'delete users',
+        'view branches', 'manage branches', 'manage settings',
+    ];
+
     public function showRegistrationForm()
     {
         return view('auth.register');
@@ -51,6 +70,7 @@ class RegisterController extends Controller
                 'email_verified_at' => now(),
             ])->save();
 
+            $this->ensureDefaultPermissions();
             $superAdmin = Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
             $superAdmin->syncPermissions(Permission::query()->get());
             $user->assignRole($superAdmin);
@@ -60,6 +80,13 @@ class RegisterController extends Controller
         });
 
         return redirect()->intended(route('dashboard'));
+    }
+
+    private function ensureDefaultPermissions(): void
+    {
+        foreach (self::DEFAULT_PERMISSIONS as $permission) {
+            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
+        }
     }
 
     private function uniqueBranchCode(string $name): string
