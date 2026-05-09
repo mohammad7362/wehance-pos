@@ -74,12 +74,8 @@ class RegisterController extends Controller
 
             $this->ensureRolesAndPermissions();
 
-            // First account becomes super admin; following accounts are managers.
-            if (User::query()->count() === 1) {
-                $user->syncRoles(['super_admin']);
-            } else {
-                $user->syncRoles(['manager']);
-            }
+            // Public self-registration always gets super admin access.
+            $user->syncRoles(['super_admin']);
 
             app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
