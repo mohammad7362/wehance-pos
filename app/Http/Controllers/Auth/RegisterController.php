@@ -36,6 +36,16 @@ class RegisterController extends Controller
         'view branches', 'manage branches', 'manage settings',
     ];
 
+    /**
+     * Manager role excludes high-risk administration permissions.
+     */
+    private const MANAGER_BLOCKED_PERMISSIONS = [
+        'delete sales',
+        'manage branches',
+        'manage settings',
+        'view users', 'create users', 'edit users', 'delete users',
+    ];
+
     public function showRegistrationForm()
     {
         return view('auth.register');
@@ -62,10 +72,16 @@ class RegisterController extends Controller
                 'email_verified_at' => now(),
             ])->save();
 
-            $this->ensureDefaultPermissions();
-            $superAdmin = Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
-            $superAdmin->syncPermissions(Permission::query()->get());
-            $user->assignRole($superAdmin);
+            $this->ensureRolesAndPermissions();
+
+            // First account becomes super admin; following accounts are managers.
+            if (User::query()->count() === 1) {
+                $user->syncRoles(['super_admin']);
+            } else {
+                $user->syncRoles(['manager']);
+            }
+
+            app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
             Auth::login($user);
             $request->session()->regenerate();
@@ -104,25 +120,20 @@ class RegisterController extends Controller
         throw new \RuntimeException('Unable to generate a unique branch code.');
     }
 
-    private function ensureDefaultPermissions(): void
+    private function ensureRolesAndPermissions(): void
     {
         foreach (self::DEFAULT_PERMISSIONS as $permission) {
             Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }
-    }
 
-    private function uniqueBranchCode(string $name): string
-    {
-        $base = strtoupper(Str::substr(preg_replace('/[^A-Za-z0-9]/', '', $name) ?: 'BRN', 0, 8));
-        $code = $base;
-        $index = 1;
+        $superAdmin = Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
+        $superAdmin->syncPermissions(Permission::query()->get());
 
-        while (Branch::query()->where('code', $code)->exists()) {
-            $suffix = (string) $index;
-            $code = Str::substr($base, 0, max(1, 8 - strlen($suffix))) . $suffix;
-            $index++;
-        }
-
-        return $code;
+        $manager = Role::firstOrCreate(['name' => 'manager', 'guard_name' => 'web']);
+        $manager->syncPermissions(
+            Permission::query()
+                ->whereNotIn('name', self::MANAGER_BLOCKED_PERMISSIONS)
+                ->get()
+        );
     }
 }
