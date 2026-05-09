@@ -6,9 +6,12 @@ use App\Models\Branch;
 use App\Models\AppSetting;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class GeneralSettings extends Component
 {
+    use WithFileUploads;
+
     public string $app_name     = '';
     public string $app_currency = 'USD';
     public string $secondary_currency = '';
@@ -18,6 +21,8 @@ class GeneralSettings extends Component
     public bool   $enable_loyalty = false;
     public string $loyalty_rate   = '1'; // points per dollar
     public ?int   $branchId = null;
+    public $receipt_logo = null;
+    public ?string $currentReceiptLogo = null;
 
     public function mount(): void
     {
@@ -32,6 +37,7 @@ class GeneralSettings extends Component
         $this->receipt_footer = $branch?->receipt_footer ?? 'Thank you for your business!';
         $this->enable_loyalty = AppSetting::getBool('enable_loyalty', false);
         $this->loyalty_rate   = (string) AppSetting::getFloat('loyalty_rate', 1);
+        $this->currentReceiptLogo = AppSetting::getValue('receipt_logo');
     }
 
     public function save(): void
@@ -44,6 +50,7 @@ class GeneralSettings extends Component
             'tax_rate'       => 'required|numeric|min:0|max:100',
             'receipt_footer' => 'nullable|string|max:500',
             'loyalty_rate'   => 'required|numeric|min:0',
+            'receipt_logo'   => 'nullable|image|max:2048',
         ]);
 
         if ($this->branchId) {
@@ -64,6 +71,13 @@ class GeneralSettings extends Component
             AppSetting::setValue('app_name', trim($this->app_name));
             AppSetting::setValue('enable_loyalty', $this->enable_loyalty);
             AppSetting::setValue('loyalty_rate', $this->loyalty_rate);
+
+            if ($this->receipt_logo) {
+                $path = $this->receipt_logo->store('logos', 'public');
+                AppSetting::setValue('receipt_logo', $path);
+                $this->currentReceiptLogo = $path;
+                $this->receipt_logo = null;
+            }
 
             config([
                 'app.display_name' => trim($this->app_name),

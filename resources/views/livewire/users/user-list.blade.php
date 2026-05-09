@@ -8,16 +8,12 @@
                     <option value="{{ $r->name }}">{{ ucwords(str_replace('_',' ',$r->name)) }}</option>
                 @endforeach
             </select>
-            <select wire:model.live="branch_id" class="input-field">
-                <option value="">All Branches</option>
-                @foreach($branches as $b)
-                    <option value="{{ $b->id }}">{{ $b->name }}</option>
-                @endforeach
-            </select>
         </div>
-        <button wire:click="openCreate" class="btn-primary flex items-center gap-2">
-            <x-pos-icon name="plus" class="w-4 h-4" /> Add User
-        </button>
+        @can('create users')
+            <button wire:click="openCreate" class="btn-primary flex items-center gap-2">
+                <x-pos-icon name="plus" class="w-4 h-4" /> Add User
+            </button>
+        @endcan
     </div>
 
     @if(session('success'))
@@ -52,22 +48,43 @@
                         </td>
                         <td class="px-4 py-3 text-gray-600">{{ $u->branch?->name ?? '—' }}</td>
                         <td class="px-4 py-3 text-center">
-                            <button wire:click="toggleActive({{ $u->id }})">
-                                <span class="badge-{{ $u->is_active ? 'green' : 'red' }} cursor-pointer">
+                            @can('edit users')
+                                @if($u->id !== auth()->id())
+                                    <button wire:click="toggleActive({{ $u->id }})">
+                                        <span class="badge-{{ $u->is_active ? 'green' : 'red' }} cursor-pointer">
+                                            {{ $u->is_active ? 'Active' : 'Inactive' }}
+                                        </span>
+                                    </button>
+                                @else
+                                    <span class="badge-{{ $u->is_active ? 'green' : 'red' }}">
+                                        {{ $u->is_active ? 'Active' : 'Inactive' }}
+                                    </span>
+                                @endif
+                            @else
+                                <span class="badge-{{ $u->is_active ? 'green' : 'red' }}">
                                     {{ $u->is_active ? 'Active' : 'Inactive' }}
                                 </span>
-                            </button>
+                            @endcan
                         </td>
                         <td class="px-4 py-3 text-right">
                             <div class="flex items-center justify-end gap-2">
-                                <button wire:click="openEdit({{ $u->id }})" class="btn-icon-edit">
-                                    <x-pos-icon name="pencil" class="w-4 h-4" />
-                                </button>
-                                @if($u->id !== auth()->id())
-                                    <button wire:click="confirmDelete({{ $u->id }})" class="btn-icon-delete">
-                                        <x-pos-icon name="trash" class="w-4 h-4" />
+                                @can('edit users')
+                                    <button wire:click="openEdit({{ $u->id }})" class="btn-icon-edit">
+                                        <x-pos-icon name="pencil" class="w-4 h-4" />
                                     </button>
-                                @endif
+                                    @if(auth()->user()?->hasRole('super_admin') && $u->id !== auth()->id())
+                                        <button wire:click="forceSignOut({{ $u->id }})" class="btn-icon-edit" title="Force Sign Out">
+                                            <x-pos-icon name="arrow-right-on-rectangle" class="w-4 h-4" />
+                                        </button>
+                                    @endif
+                                @endcan
+                                @can('delete users')
+                                    @if($u->id !== auth()->id())
+                                        <button wire:click="confirmDelete({{ $u->id }})" class="btn-icon-delete">
+                                            <x-pos-icon name="trash" class="w-4 h-4" />
+                                        </button>
+                                    @endif
+                                @endcan
                             </div>
                         </td>
                     </tr>
@@ -106,14 +123,27 @@
                         @endforeach
                     </select>
                 </div>
+                <div class="col-span-2">
+                    <label class="form-label">Extra Permissions</label>
+                    <p class="text-xs text-gray-500 mb-2">Assign additional permissions for this user. Role permissions are always included.</p>
+                    <div class="max-h-52 overflow-auto rounded-lg border border-gray-200 p-3 grid grid-cols-2 gap-2">
+                        @foreach($permissions as $perm)
+                            <label class="flex items-center gap-2 text-sm text-gray-700">
+                                <input type="checkbox" value="{{ $perm->name }}" wire:model="selectedPermissions" class="w-4 h-4" />
+                                <span>{{ ucwords(str_replace('_', ' ', $perm->name)) }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                    @error('selectedPermissions.*') <p class="form-error">{{ $message }}</p> @enderror
+                </div>
                 <div>
                     <label class="form-label">Branch</label>
-                    <select wire:model="form_branch_id" class="input-field w-full">
-                        <option value="">— None —</option>
+                    <select wire:model="form_branch_id" class="input-field w-full" disabled>
                         @foreach($branches as $b)
                             <option value="{{ $b->id }}">{{ $b->name }}</option>
                         @endforeach
                     </select>
+                    <p class="text-xs text-gray-500 mt-1">Users are created inside your account branch only.</p>
                 </div>
                 <div class="flex items-center gap-2 mt-4">
                     <input wire:model="is_active" type="checkbox" id="usr_active" class="w-4 h-4" />

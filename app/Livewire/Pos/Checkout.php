@@ -81,7 +81,7 @@ class Checkout extends Component
     {
         if (strlen($value) >= 2) {
             $branchId = Auth::user()?->branch_id;
-            $this->searchResults = Product::with(['inventory' => fn($q) => $q->where('branch_id', $branchId)])
+            $this->searchResults = Product::with(['inventory' => fn($q) => $q->where('branch_id', $branchId)->whereNull('product_variant_id')])
                 ->where('is_active', true)
                 ->where(function ($q) use ($value) {
                     $q->where('name', 'like', "%{$value}%")
@@ -133,7 +133,7 @@ class Checkout extends Component
 
         $branchId = Auth::user()?->branch_id;
         $stock = (float) Inventory::where('product_id', $productId)
-            ->when($variantId, fn($q) => $q->where('product_variant_id', $variantId))
+            ->when($variantId, fn($q) => $q->where('product_variant_id', $variantId), fn($q) => $q->whereNull('product_variant_id'))
             ->where('branch_id', $branchId)
             ->value('quantity') ?? 0;
 
@@ -526,7 +526,7 @@ class Checkout extends Component
 
         $categories = \App\Models\Category::where('is_active', true)->orderBy('sort_order')->get();
         $branchId = Auth::user()?->branch_id;
-        $featuredProducts = Product::with(['inventory' => fn($q) => $q->where('branch_id', $branchId)])
+        $featuredProducts = Product::with(['inventory' => fn($q) => $q->where('branch_id', $branchId)->whereNull('product_variant_id')])
             ->where('is_active', true)
             ->orderBy('name')
             ->take(24)

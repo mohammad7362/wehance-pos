@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ config('app.display_name', 'WehancePOS') }} – {{ __('Sign In') }}</title>
+    <title>{{ config('app.display_name', 'WehancePOS') }} - {{ __('Create Account') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
@@ -19,8 +19,8 @@
     <div class="mb-4 flex justify-end">
         <form method="POST" action="{{ route('locale.switch') }}">
             @csrf
-            <label for="login-locale-switcher" class="sr-only">{{ __('Language') }}</label>
-            <select id="login-locale-switcher" name="locale" onchange="this.form.submit()"
+            <label for="register-locale-switcher" class="sr-only">{{ __('Language') }}</label>
+            <select id="register-locale-switcher" name="locale" onchange="this.form.submit()"
                 class="rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200/20">
                 @foreach(config('app.supported_locales', []) as $localeCode => $localeLabel)
                     <option value="{{ $localeCode }}" @selected(app()->getLocale() === $localeCode) class="text-slate-900">{{ $localeLabel }}</option>
@@ -29,7 +29,6 @@
         </form>
     </div>
 
-    {{-- Logo / Brand --}}
     <div class="text-center mb-8">
         <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4 shadow-xl">
             <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -38,12 +37,11 @@
             </svg>
         </div>
         <h1 class="text-3xl font-bold text-white">{{ config('app.display_name', 'WehancePOS') }}</h1>
-        <p class="text-slate-400 mt-1">{{ __('Professional Point of Sale System') }}</p>
+        <p class="text-slate-400 mt-1">{{ __('Create your account') }}</p>
     </div>
 
-    {{-- Login Card --}}
     <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 shadow-2xl {{ $isRtl ? 'text-right' : '' }}">
-        <h2 class="text-xl font-semibold text-white mb-6">{{ __('Sign in to your account') }}</h2>
+        <h2 class="text-xl font-semibold text-white mb-6">{{ __('Sign up') }}</h2>
 
         @if ($errors->any())
             <div class="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mb-5">
@@ -55,17 +53,18 @@
             </div>
         @endif
 
-        @if (session('status'))
-            <div class="bg-green-500/20 border border-green-500/50 rounded-lg p-4 mb-5 text-green-300 text-sm">
-                {{ session('status') }}
-            </div>
-        @endif
-
-        <form method="POST" action="{{ route('login.post') }}" class="space-y-5">
+        <form method="POST" action="{{ route('register.post') }}" class="space-y-5">
             @csrf
             <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1.5">{{ __('Full Name') }}</label>
+                <input type="text" name="name" value="{{ old('name') }}" required autofocus
+                    class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-400
+                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    placeholder="John Doe">
+            </div>
+            <div>
                 <label class="block text-sm font-medium text-slate-300 mb-1.5">{{ __('Email Address') }}</label>
-                <input type="email" name="email" value="{{ old('email') }}" required autofocus
+                <input type="email" name="email" value="{{ old('email') }}" required
                     class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-400
                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                     placeholder="you@example.com">
@@ -75,24 +74,25 @@
                 <input type="password" name="password" required
                     class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-400
                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                    placeholder="••••••••">
+                    placeholder="********">
             </div>
-            <div class="flex items-center justify-between">
-                <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" name="remember" class="w-4 h-4 rounded border-white/30 bg-white/10 text-blue-500 focus:ring-blue-500">
-                    <span class="text-sm text-slate-300">{{ __('Remember me') }}</span>
-                </label>
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1.5">{{ __('Confirm Password') }}</label>
+                <input type="password" name="password_confirmation" required
+                    class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-400
+                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    placeholder="********">
             </div>
             <button type="submit"
                 class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg
                        transition-colors duration-200 shadow-lg shadow-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                {{ __('Sign In') }}
+                {{ __('Create Account') }}
             </button>
         </form>
 
         <p class="mt-5 text-center text-sm text-slate-300">
-            {{ __('Need an account?') }}
-            <a href="{{ route('register') }}" class="text-blue-300 hover:text-blue-200 font-medium">{{ __('Create Account') }}</a>
+            {{ __('Already have an account?') }}
+            <a href="{{ route('login') }}" class="text-blue-300 hover:text-blue-200 font-medium">{{ __('Sign In') }}</a>
         </p>
     </div>
 

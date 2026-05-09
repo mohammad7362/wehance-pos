@@ -4,6 +4,7 @@ namespace App\Livewire\Sales;
 
 use App\Models\Branch;
 use App\Models\Sale;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -22,7 +23,11 @@ class SaleList extends Component
 
     public function voidSale(int $id): void
     {
-        $sale = Sale::findOrFail($id);
+        $sale = Sale::query()
+            ->whereKey($id)
+            ->where('branch_id', Auth::user()?->branch_id)
+            ->firstOrFail();
+
         if ($sale->status !== 'completed') {
             return;
         }
@@ -40,19 +45,23 @@ class SaleList extends Component
 
     public function render()
     {
+        $branchId = Auth::user()?->branch_id;
+
         $sales = Sale::with(['customer', 'branch', 'cashier'])
+            ->where('branch_id', $branchId)
             ->when($this->search, function ($q) {
                 $q->where('reference_no', 'like', "%{$this->search}%")
                   ->orWhereHas('customer', fn($c) => $c->where('name', 'like', "%{$this->search}%"));
             })
-            ->when($this->branch_id, fn($q) => $q->where('branch_id', $this->branch_id))
             ->when($this->status, fn($q) => $q->where('status', $this->status))
             ->when($this->dateFrom, fn($q) => $q->whereDate('created_at', '>=', $this->dateFrom))
             ->when($this->dateTo, fn($q) => $q->whereDate('created_at', '<=', $this->dateTo))
             ->latest()
             ->paginate(25);
 
-        $branches = Branch::where('is_active', true)->get();
+        $branches = Branch::where('is_active', true)
+            ->where('id', $branchId)
+            ->get();
 
         return view('livewire.sales.sale-list', compact('sales', 'branches'))
             ->layout('layouts.app', ['title' => 'Sales']);

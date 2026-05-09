@@ -58,7 +58,11 @@ class ExpenseList extends Component
 
     public function openEdit(int $id): void
     {
-        $e = Expense::findOrFail($id);
+        $e = Expense::query()
+            ->whereKey($id)
+            ->where('branch_id', Auth::user()?->branch_id)
+            ->firstOrFail();
+
         $this->editingId            = $id;
         $this->expense_category_id  = $e->expense_category_id;
         $this->form_branch_id       = $e->branch_id;
@@ -86,6 +90,7 @@ class ExpenseList extends Component
         ];
 
         if ($this->editingId) {
+            abort_unless($existingExpense && $existingExpense->branch_id === Auth::user()?->branch_id, 403);
             $existingExpense->update($data);
         } else {
             Expense::create($data);
@@ -105,7 +110,12 @@ class ExpenseList extends Component
     public function delete(): void
     {
         if ($this->deletingId) {
-            Expense::findOrFail($this->deletingId)->delete();
+            Expense::query()
+                ->whereKey($this->deletingId)
+                ->where('branch_id', Auth::user()?->branch_id)
+                ->firstOrFail()
+                ->delete();
+
             session()->flash('success', 'Expense deleted.');
         }
         $this->showDeleteModal = false;
@@ -125,16 +135,20 @@ class ExpenseList extends Component
 
     public function render()
     {
+        $branchId = Auth::user()?->branch_id;
+
         $expenses = Expense::with(['category', 'branch', 'user'])
+            ->where('branch_id', $branchId)
             ->when($this->search, fn($q) => $q->where('description', 'like', "%{$this->search}%"))
-            ->when($this->branch_id, fn($q) => $q->where('branch_id', $this->branch_id))
             ->when($this->category_id, fn($q) => $q->where('expense_category_id', $this->category_id))
             ->when($this->dateFrom, fn($q) => $q->whereDate('date', '>=', $this->dateFrom))
             ->when($this->dateTo, fn($q) => $q->whereDate('date', '<=', $this->dateTo))
             ->latest('date')
             ->paginate(25);
 
-        $branches   = Branch::where('is_active', true)->get();
+        $branches   = Branch::where('is_active', true)
+            ->where('id', $branchId)
+            ->get();
         $categories = ExpenseCategory::orderBy('name')->get();
 
         return view('livewire.expenses.expense-list', compact('expenses', 'branches', 'categories'))

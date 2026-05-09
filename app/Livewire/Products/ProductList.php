@@ -3,9 +3,11 @@
 namespace App\Livewire\Products;
 
 use App\Models\Category;
+use App\Models\Inventory;
 use App\Models\Product;
 use App\Models\Supplier;
 use App\Models\Unit;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
@@ -39,6 +41,7 @@ class ProductList extends Component
     public bool $track_inventory = true;
     public bool $is_active = true;
     public $image;
+    public string $initial_stock = '0';
 
     protected function rules(): array
     {
@@ -57,6 +60,7 @@ class ProductList extends Component
             'track_inventory' => 'boolean',
             'is_active' => 'boolean',
             'image' => 'nullable|image|max:2048',
+            'initial_stock' => 'integer|min:0',
         ];
     }
 
@@ -79,17 +83,19 @@ class ProductList extends Component
     {
         $this->reset(['editingId', 'name', 'description', 'barcode', 'sku', 'category_id',
             'unit_id', 'supplier_id', 'cost_price', 'selling_price', 'tax_rate', 'min_stock_alert',
-            'track_inventory', 'is_active', 'image']);
+            'track_inventory', 'is_active', 'image', 'initial_stock']);
         $this->track_inventory = true;
         $this->is_active = true;
         $this->tax_rate = '0';
         $this->min_stock_alert = '5';
+        $this->initial_stock = '0';
         $this->showModal = true;
     }
 
     public function openEdit(int $id): void
     {
         $product = Product::findOrFail($id);
+
         $this->editingId = $product->id;
         $this->name = $product->name;
         $this->description = $product->description ?? '';
@@ -136,6 +142,7 @@ class ProductList extends Component
 
         if ($this->editingId) {
             $product = Product::findOrFail($this->editingId);
+
             // Ensure unique slug for edits
             if ($product->name !== $this->name) {
                 $data['slug'] = \Illuminate\Support\Str::slug($this->name) . '-' . $this->editingId;
@@ -148,7 +155,25 @@ class ProductList extends Component
             if ($existingSlug) {
                 $data['slug'] = $slug . '-' . time();
             }
-            Product::create($data);
+            $product = Product::create($data);
+
+            $branchId = Auth::user()?->branch_id
+                ?? \App\Models\Branch::where('is_active', true)->value('id');
+
+            if ($branchId) {
+                $qty = max(0, (int) $this->initial_stock);
+                $inventory = Inventory::firstOrCreate([
+                    'product_id' => $product->id,
+                    'product_variant_id' => null,
+                    'branch_id' => $branchId,
+                ], [
+                    'quantity' => 0,
+                ]);
+                if ($qty > 0 && $product->track_inventory) {
+                    $inventory->increment('quantity', $qty);
+                }
+            }
+
             session()->flash('success', 'Product created successfully.');
         }
 
@@ -165,6 +190,7 @@ class ProductList extends Component
     public function delete(): void
     {
         Product::findOrFail($this->deletingId)->delete();
+
         $this->showDeleteModal = false;
         $this->deletingId = null;
         session()->flash('success', 'Product deleted.');
@@ -178,7 +204,13 @@ class ProductList extends Component
 
     public function render()
     {
-        $products = Product::with(['category', 'unit'])
+        $branchId = Auth::user()?->branch_id;
+
+        $products = Product::with([
+                'category',
+                'unit',
+                'inventory' => fn ($q) => $q->where('branch_id', $branchId)->whereNull('product_variant_id'),
+            ])
             ->when($this->search, fn($q) => $q->where(function ($q) {
                 $q->where('name', 'like', "%{$this->search}%")
                   ->orWhere('barcode', 'like', "%{$this->search}%")

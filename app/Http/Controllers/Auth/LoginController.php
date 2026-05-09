@@ -42,6 +42,9 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
+        $currentUser = Auth::user();
+        abort_unless($currentUser instanceof \App\Models\User && $currentUser->hasRole('super_admin'), 403);
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

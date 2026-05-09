@@ -10,6 +10,10 @@
         <div class="alert-success mb-4">{{ session('success') }}</div>
     @endif
 
+    @if(session('error'))
+        <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{{ session('error') }}</div>
+    @endif
+
     <div class="card p-6 max-w-5xl">
         <h2 class="text-lg font-bold mb-5">{{ $isEdit ? 'Edit Product' : 'Create Product' }}</h2>
 
@@ -86,6 +90,13 @@
                 @error('min_stock_alert') <p class="form-error">{{ $message }}</p> @enderror
             </div>
 
+            <div>
+                <label class="form-label">Pieces per Box</label>
+                <input wire:model.blur="pieces_per_box" type="number" min="1" class="input-field w-full" placeholder="Leave empty if not sold in boxes" />
+                @error('pieces_per_box') <p class="form-error">{{ $message }}</p> @enderror
+                <p class="text-xs text-gray-500 mt-1">How many pieces fit in one box. Used to track box & piece quantities.</p>
+            </div>
+
             <div class="md:col-span-2">
                 <label class="form-label">Description</label>
                 <textarea wire:model="description" rows="3" class="input-field w-full"></textarea>
@@ -104,6 +115,26 @@
                 <input wire:model="track_inventory" id="track_inventory" type="checkbox" class="w-4 h-4" />
                 <label for="track_inventory" class="text-sm text-gray-700">Track inventory</label>
             </div>
+
+            @if(!$isEdit)
+            <div class="md:col-span-2 border-t pt-4">
+                <h3 class="font-semibold text-sm text-gray-700 mb-3">Initial Stock</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="form-label">Number of Boxes</label>
+                        <input wire:model.blur="initial_boxes" type="number" min="0" class="input-field w-full" placeholder="0" />
+                        @error('initial_boxes') <p class="form-error">{{ $message }}</p> @enderror
+                        <p class="text-xs text-gray-500 mt-1">Each box contains the "Pieces per Box" count.</p>
+                    </div>
+                    <div>
+                        <label class="form-label">Loose Pieces</label>
+                        <input wire:model.blur="initial_pieces" type="number" min="0" class="input-field w-full" placeholder="0" />
+                        @error('initial_pieces') <p class="form-error">{{ $message }}</p> @enderror
+                        <p class="text-xs text-gray-500 mt-1">Extra individual pieces not in a full box.</p>
+                    </div>
+                </div>
+            </div>
+            @endif
 
             <div class="flex items-center gap-2">
                 <input wire:model="is_active" id="is_active" type="checkbox" class="w-4 h-4" />

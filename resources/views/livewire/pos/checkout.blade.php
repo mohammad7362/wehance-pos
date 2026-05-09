@@ -1,11 +1,24 @@
 @php
     $isRtl = app()->getLocale() === 'ar';
 @endphp
-<div wire:key="pos-checkout" class="space-y-0 {{ $isRtl ? 'text-right' : '' }}">
-<div class="flex gap-4 h-[calc(100vh-8rem)]">
+<div wire:key="pos-checkout" class="space-y-0 {{ $isRtl ? 'text-right' : '' }}" x-data="{ posTab: 'products' }">
+{{-- Mobile Tab Bar --}}
+<div class="flex lg:hidden bg-white border border-slate-200 rounded-xl mb-3 overflow-hidden">
+    <button @click="posTab = 'products'"
+        :class="posTab === 'products' ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-50'"
+        class="flex-1 py-3 text-sm font-semibold transition-colors">
+        {{ __('Products') }}
+    </button>
+    <button @click="posTab = 'cart'"
+        :class="posTab === 'cart' ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-50'"
+        class="flex-1 py-3 text-sm font-semibold transition-colors">
+        {{ __('Cart') }} ({{ count($cart) }})
+    </button>
+</div>
+<div class="flex gap-4 lg:h-[calc(100vh-8rem)]">
 
     {{-- LEFT: Product Search & Grid --}}
-    <div class="flex-1 flex flex-col gap-4 min-w-0">
+    <div class="flex-1 flex flex-col gap-4 min-w-0" :class="posTab !== 'products' ? 'hidden lg:flex' : ''">
 
         {{-- Search Bar --}}
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
@@ -56,7 +69,7 @@
                 @php $stock = $product->inventory->first()?->quantity ?? 0; @endphp
                 <button wire:click="addToCart({{ $product->id }})"
                     class="bg-white border border-slate-100 rounded-2xl p-3 text-left shadow-sm hover:shadow-md hover:border-blue-200 transition-all
-                           {{ $stock <= 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-50' }}"
+                           {{ $stock <= 0 && $product->track_inventory ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-50' }}"
                     {{ $stock <= 0 && $product->track_inventory ? 'disabled' : '' }}>
                     <div class="w-full aspect-square bg-slate-100 rounded-xl flex items-center justify-center mb-2 overflow-hidden">
                         @if($product->image)
@@ -80,7 +93,7 @@
     </div>
 
     {{-- RIGHT: Cart --}}
-    <div class="w-96 flex flex-col gap-3 flex-shrink-0">
+    <div class="w-full lg:w-96 flex flex-col gap-3 lg:flex-shrink-0" :class="posTab !== 'cart' ? 'hidden lg:flex' : ''">
 
         {{-- Customer --}}
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
@@ -335,6 +348,10 @@
             </div>
             <div class="p-5 print-only" id="receipt">
                 <div class="text-center mb-4">
+                    @php $receiptLogo = \App\Models\AppSetting::getValue('receipt_logo'); @endphp
+                    @if($receiptLogo)
+                        <img src="{{ asset('storage/' . $receiptLogo) }}" alt="Logo" class="mx-auto mb-2 max-h-16 object-contain" />
+                    @endif
                     <p class="font-bold text-lg">{{ config('app.display_name', 'WehancePOS') }}</p>
                     <p class="text-xs text-slate-500">{{ auth()->user()->branch?->name }}</p>
                     <p class="text-xs text-slate-500">{{ $completedSale->created_at->locale(app()->getLocale())->translatedFormat('d M Y h:i A') }}</p>

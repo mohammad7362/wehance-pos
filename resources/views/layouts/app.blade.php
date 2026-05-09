@@ -131,6 +131,150 @@
         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
     </div>
 
+    {{-- Mobile Sidebar Drawer --}}
+    <div x-show="mobileSidebarOpen" @click.stop
+        x-transition:enter="transition ease-in-out duration-300 transform"
+        x-transition:enter-start="{{ $isRtl ? 'translate-x-full' : '-translate-x-full' }}"
+        x-transition:enter-end="translate-x-0"
+        x-transition:leave="transition ease-in-out duration-300 transform"
+        x-transition:leave-start="translate-x-0"
+        x-transition:leave-end="{{ $isRtl ? 'translate-x-full' : '-translate-x-full' }}"
+        class="fixed top-0 {{ $isRtl ? 'right-0' : 'left-0' }} h-full w-72 z-30 bg-slate-900 text-white flex flex-col lg:hidden shadow-2xl">
+
+        {{-- Brand + Close --}}
+        <div class="flex items-center justify-between h-16 px-4 border-b border-slate-700 flex-shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="flex items-center justify-center w-9 h-9 bg-blue-600 rounded-xl flex-shrink-0">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                </div>
+                <span class="font-bold text-lg tracking-tight">{{ $appDisplayName }}</span>
+            </div>
+            <button @click="mobileSidebarOpen = false" class="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-700">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        {{-- Mobile Navigation --}}
+        <nav class="flex-1 overflow-y-auto py-4 space-y-2 px-2 text-sm" @click="mobileSidebarOpen = false">
+            <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-slate-800 text-slate-100 hover:bg-slate-700 transition-colors">
+                <x-pos-icon name="home" class="w-5 h-5 flex-shrink-0" />
+                <span class="font-medium truncate">{{ __('Dashboard') }}</span>
+            </a>
+
+            @can('create sales')
+            <a href="{{ route('pos') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-slate-800 text-slate-100 hover:bg-slate-700 transition-colors">
+                <x-pos-icon name="shopping-cart" class="w-5 h-5 flex-shrink-0" />
+                <span class="font-medium truncate">{{ __('POS / Checkout') }}</span>
+            </a>
+            @endcan
+
+            @can('view sales')
+            <a href="{{ route('sales.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-slate-800 text-slate-100 hover:bg-slate-700 transition-colors">
+                <x-pos-icon name="receipt-refund" class="w-5 h-5 flex-shrink-0" />
+                <span class="font-medium truncate">{{ __('Sales') }}</span>
+            </a>
+            @endcan
+
+            @can('view products')
+            <a href="{{ route('products.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-slate-800 text-slate-100 hover:bg-slate-700 transition-colors">
+                <x-pos-icon name="cube" class="w-5 h-5 flex-shrink-0" />
+                <span class="font-medium truncate">{{ __('Products') }}</span>
+            </a>
+            @endcan
+
+            @can('view categories')
+            <a href="{{ route('categories.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-slate-800 text-slate-100 hover:bg-slate-700 transition-colors">
+                <x-pos-icon name="tag" class="w-5 h-5 flex-shrink-0" />
+                <span class="font-medium truncate">{{ __('Categories') }}</span>
+            </a>
+            @endcan
+
+            @can('view inventory')
+            <a href="{{ route('inventory.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-slate-800 text-slate-100 hover:bg-slate-700 transition-colors">
+                <x-pos-icon name="archive-box" class="w-5 h-5 flex-shrink-0" />
+                <span class="font-medium truncate">{{ __('Inventory') }}</span>
+            </a>
+            @endcan
+
+            @can('view purchases')
+            <a href="{{ route('purchases.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-slate-800 text-slate-100 hover:bg-slate-700 transition-colors">
+                <x-pos-icon name="truck" class="w-5 h-5 flex-shrink-0" />
+                <span class="font-medium truncate">{{ __('Purchases') }}</span>
+            </a>
+            @endcan
+
+            @can('view suppliers')
+            <a href="{{ route('suppliers.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-slate-800 text-slate-100 hover:bg-slate-700 transition-colors">
+                <x-pos-icon name="building-office" class="w-5 h-5 flex-shrink-0" />
+                <span class="font-medium truncate">{{ __('Suppliers') }}</span>
+            </a>
+            @endcan
+
+            @can('view customers')
+            <a href="{{ route('customers.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-slate-800 text-slate-100 hover:bg-slate-700 transition-colors">
+                <x-pos-icon name="users" class="w-5 h-5 flex-shrink-0" />
+                <span class="font-medium truncate">{{ __('Customers') }}</span>
+            </a>
+            @endcan
+
+            @can('view discounts')
+            <a href="{{ route('discounts.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-slate-800 text-slate-100 hover:bg-slate-700 transition-colors">
+                <x-pos-icon name="ticket" class="w-5 h-5 flex-shrink-0" />
+                <span class="font-medium truncate">{{ __('Discounts') }}</span>
+            </a>
+            @endcan
+
+            @can('view expenses')
+            <a href="{{ route('expenses.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-slate-800 text-slate-100 hover:bg-slate-700 transition-colors">
+                <x-pos-icon name="banknotes" class="w-5 h-5 flex-shrink-0" />
+                <span class="font-medium truncate">{{ __('Expenses') }}</span>
+            </a>
+            @endcan
+
+            @can('view reports')
+            <a href="{{ route('reports.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-slate-800 text-slate-100 hover:bg-slate-700 transition-colors">
+                <x-pos-icon name="chart-bar" class="w-5 h-5 flex-shrink-0" />
+                <span class="font-medium truncate">{{ __('Reports') }}</span>
+            </a>
+            @endcan
+
+            @can('view users')
+            <div class="px-3 pt-4 pb-1">
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">{{ __('Admin') }}</span>
+            </div>
+            <a href="{{ route('users.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-slate-800 text-slate-100 hover:bg-slate-700 transition-colors">
+                <x-pos-icon name="user-group" class="w-5 h-5 flex-shrink-0" />
+                <span class="font-medium truncate">{{ __('Users') }}</span>
+            </a>
+            @endcan
+
+            @can('view branches')
+            <a href="{{ route('branches.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-slate-800 text-slate-100 hover:bg-slate-700 transition-colors">
+                <x-pos-icon name="building-storefront" class="w-5 h-5 flex-shrink-0" />
+                <span class="font-medium truncate">{{ __('Branches') }}</span>
+            </a>
+            @endcan
+
+            @can('manage settings')
+            <a href="{{ route('settings') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-slate-800 text-slate-100 hover:bg-slate-700 transition-colors">
+                <x-pos-icon name="cog-6-tooth" class="w-5 h-5 flex-shrink-0" />
+                <span class="font-medium truncate">{{ __('Settings') }}</span>
+            </a>
+            @endcan
+        </nav>
+
+        {{-- User info at bottom --}}
+        <div class="border-t border-slate-700 p-4">
+            <p class="text-sm font-medium text-white">{{ auth()->user()->name }}</p>
+            <p class="text-xs text-slate-400">{{ auth()->user()->email }}</p>
+        </div>
+    </div>
+
     {{-- Main Content --}}
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
 
@@ -200,15 +344,21 @@
                             </svg>
                             {{ __('Profile') }}
                         </a>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                                </svg>
-                                {{ __('Sign Out') }}
-                            </button>
-                        </form>
+                        @if(auth()->user()?->hasRole('super_admin'))
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                    </svg>
+                                    {{ __('Sign Out') }}
+                                </button>
+                            </form>
+                        @else
+                            <div class="px-4 py-2 text-xs text-slate-500 border-t border-slate-100">
+                                {{ __('Only admin can sign out this account.') }}
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>

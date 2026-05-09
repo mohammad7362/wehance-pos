@@ -3,9 +3,12 @@
 namespace App\Livewire\Products;
 
 use App\Models\Category;
+use App\Models\Inventory;
+use App\Models\InventoryMovement;
 use App\Models\Product;
 use App\Models\Supplier;
 use App\Models\Unit;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -28,10 +31,15 @@ class ProductForm extends Component
     public string $selling_price = '0';
     public string $tax_rate = '0';
     public string $min_stock_alert = '5';
+    public string $pieces_per_box = '';
     public bool $track_inventory = true;
     public bool $is_active = true;
     public $image;
     public ?string $currentImage = null;
+
+    // Initial stock (only on create)
+    public string $initial_boxes = '0';
+    public string $initial_pieces = '0';
 
     public function mount(?Product $product = null): void
     {
@@ -49,6 +57,7 @@ class ProductForm extends Component
             $this->selling_price = (string) $product->selling_price;
             $this->tax_rate = (string) $product->tax_rate;
             $this->min_stock_alert = (string) $product->min_stock_alert;
+            $this->pieces_per_box = $product->pieces_per_box ? (string) $product->pieces_per_box : '';
             $this->track_inventory = (bool) $product->track_inventory;
             $this->is_active = (bool) $product->is_active;
             $this->currentImage = $product->image;
@@ -71,9 +80,12 @@ class ProductForm extends Component
             'selling_price' => 'required|numeric|min:0',
             'tax_rate' => 'required|numeric|min:0|max:100',
             'min_stock_alert' => 'required|integer|min:0',
+            'pieces_per_box' => 'nullable|integer|min:1',
             'track_inventory' => 'boolean',
             'is_active' => 'boolean',
             'image' => 'nullable|image|max:2048',
+            'initial_boxes' => 'integer|min:0',
+            'initial_pieces' => 'integer|min:0',
         ];
     }
 
@@ -93,6 +105,7 @@ class ProductForm extends Component
             'selling_price' => $this->selling_price,
             'tax_rate' => $this->tax_rate,
             'min_stock_alert' => $this->min_stock_alert,
+            'pieces_per_box' => $this->pieces_per_box !== '' ? (int) $this->pieces_per_box : null,
             'track_inventory' => $this->track_inventory,
             'is_active' => $this->is_active,
         ];
@@ -117,7 +130,46 @@ class ProductForm extends Component
                 $slug .= '-' . time();
             }
             $data['slug'] = $slug;
-            Product::create($data);
+            $product = Product::create($data);
+
+            // Seed initial stock / always create inventory row for branch
+            $branchId = Auth::user()?->branch_id
+                ?? \App\Models\Branch::where('is_active', true)->value('id');
+
+            if ($branchId) {
+                $piecesPerBox = max(1, (int) ($product->pieces_per_box ?? 1));
+                $boxes  = max(0, (int) $this->initial_boxes);
+                $pieces = max(0, (int) $this->initial_pieces);
+                $totalQty = $product->track_inventory ? ($boxes * $piecesPerBox) + $pieces : 0;
+
+                $inventory = Inventory::firstOrCreate([
+                        'product_id' => $product->id,
+                        'product_variant_id' => null,
+                        'branch_id' => $branchId,
+                    ], [
+                        'quantity' => 0,
+                    ]);
+
+                $beforeQty = (float) ($inventory->quantity ?? 0);
+
+                if ($totalQty > 0) {
+                    $inventory->increment('quantity', $totalQty);
+                    $afterQty = $beforeQty + $totalQty;
+
+                    InventoryMovement::create([
+                        'product_id' => $product->id,
+                        'product_variant_id' => null,
+                        'branch_id' => $branchId,
+                        'user_id' => Auth::id(),
+                        'type' => 'initial',
+                        'quantity' => $totalQty,
+                        'quantity_before' => $beforeQty,
+                        'quantity_after' => $afterQty,
+                        'notes' => 'Initial stock (' . $this->initial_boxes . ' boxes + ' . $this->initial_pieces . ' pieces)',
+                    ]);
+                }
+            }
+
             session()->flash('success', 'Product created successfully.');
         }
 

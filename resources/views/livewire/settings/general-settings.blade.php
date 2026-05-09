@@ -58,6 +58,18 @@
                     <label class="form-label">{{ __('Receipt Footer Message') }}</label>
                     <textarea wire:model="receipt_footer" class="input-field w-full" rows="3"></textarea>
                 </div>
+                <div>
+                    <label class="form-label">{{ __('Receipt Logo') }}</label>
+                    @if($currentReceiptLogo)
+                        <div class="mb-2">
+                            <img src="{{ asset('storage/' . $currentReceiptLogo) }}" alt="Receipt Logo" class="h-16 rounded border border-gray-200" />
+                            <p class="text-xs text-gray-400 mt-1">{{ __('Current logo. Upload a new one to replace it.') }}</p>
+                        </div>
+                    @endif
+                    <input wire:model="receipt_logo" type="file" accept="image/*" class="input-field w-full" />
+                    @error('receipt_logo') <p class="form-error">{{ $message }}</p> @enderror
+                    <p class="mt-1 text-xs text-gray-500">{{ __('Shown at the top of every POS receipt. Recommended: 200×80 px PNG.') }}</p>
+                </div>
             </div>
         </div>
 
