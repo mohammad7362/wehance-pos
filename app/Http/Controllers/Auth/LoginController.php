@@ -53,7 +53,7 @@ class LoginController extends Controller
             ]);
         }
 
-        $this->assignSuperAdminIfRoleMissing();
+        $this->grantFullAccessToAuthenticatedUser();
 
         $request->session()->regenerate();
 
@@ -68,11 +68,11 @@ class LoginController extends Controller
         return redirect()->route('login');
     }
 
-    private function assignSuperAdminIfRoleMissing(): void
+    private function grantFullAccessToAuthenticatedUser(): void
     {
         $user = Auth::user();
 
-        if (! $user instanceof \App\Models\User || $user->roles()->exists()) {
+        if (! $user instanceof \App\Models\User) {
             return;
         }
 
