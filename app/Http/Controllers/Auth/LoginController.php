@@ -6,9 +6,27 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class LoginController extends Controller
 {
+    private const DEFAULT_PERMISSIONS = [
+        'view dashboard',
+        'view products', 'create products', 'edit products', 'delete products',
+        'view categories', 'create categories', 'edit categories', 'delete categories',
+        'view inventory', 'adjust inventory',
+        'view sales', 'create sales', 'refund sales', 'delete sales',
+        'view purchases', 'create purchases', 'edit purchases', 'receive purchases',
+        'view customers', 'create customers', 'edit customers', 'delete customers',
+        'view suppliers', 'create suppliers', 'edit suppliers', 'delete suppliers',
+        'view discounts', 'create discounts', 'edit discounts', 'delete discounts',
+        'view reports',
+        'view expenses', 'create expenses', 'edit expenses', 'delete expenses',
+        'view users', 'create users', 'edit users', 'delete users',
+        'view branches', 'manage branches', 'manage settings',
+    ];
+
     public function showLoginForm()
     {
         return view('auth.login');
@@ -35,6 +53,8 @@ class LoginController extends Controller
             ]);
         }
 
+        $this->assignSuperAdminIfRoleMissing();
+
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard'));
@@ -46,5 +66,25 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect()->route('login');
+    }
+
+    private function assignSuperAdminIfRoleMissing(): void
+    {
+        $user = Auth::user();
+
+        if (! $user instanceof \App\Models\User || $user->roles()->exists()) {
+            return;
+        }
+
+        foreach (self::DEFAULT_PERMISSIONS as $permission) {
+            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
+        }
+
+        $superAdmin = Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
+        $superAdmin->syncPermissions(Permission::query()->get());
+
+        $user->syncRoles(['super_admin']);
+
+        app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
     }
 }
