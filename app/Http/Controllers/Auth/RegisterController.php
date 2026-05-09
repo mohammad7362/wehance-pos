@@ -7,6 +7,7 @@ use App\Models\Branch;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -49,16 +50,7 @@ class RegisterController extends Controller
         ]);
 
         DB::transaction(function () use ($validated, $request) {
-            $branch = Branch::create([
-                'name' => $validated['name'] . ' Branch',
-                'code' => $this->uniqueBranchCode($validated['name']),
-                'email' => $validated['email'],
-                'currency' => 'USD',
-                'currency_symbol' => '$',
-                'tax_rate' => 0,
-                'receipt_footer' => 'Thank you for your business!',
-                'is_active' => true,
-            ]);
+            $branch = $this->createBranchWithUniqueCode($validated['name'], $validated['email']);
 
             $user = new User();
             $user->forceFill([
@@ -80,6 +72,36 @@ class RegisterController extends Controller
         });
 
         return redirect()->intended(route('dashboard'));
+    }
+
+    private function createBranchWithUniqueCode(string $name, string $email): Branch
+    {
+        $base = strtoupper(Str::substr(preg_replace('/[^A-Za-z0-9]/', '', $name) ?: 'BRN', 0, 8));
+
+        for ($index = 0; $index < 500; $index++) {
+            $suffix = $index === 0 ? '' : (string) $index;
+            $code = Str::substr($base, 0, max(1, 8 - strlen($suffix))) . $suffix;
+
+            try {
+                return Branch::create([
+                    'name' => $name . ' Branch',
+                    'code' => $code,
+                    'email' => $email,
+                    'currency' => 'USD',
+                    'currency_symbol' => '$',
+                    'tax_rate' => 0,
+                    'receipt_footer' => 'Thank you for your business!',
+                    'is_active' => true,
+                ]);
+            } catch (UniqueConstraintViolationException $e) {
+                // Retry with next suffix when another request wins the same code.
+                if (! str_contains($e->getMessage(), 'branches_code_unique')) {
+                    throw $e;
+                }
+            }
+        }
+
+        throw new \RuntimeException('Unable to generate a unique branch code.');
     }
 
     private function ensureDefaultPermissions(): void
