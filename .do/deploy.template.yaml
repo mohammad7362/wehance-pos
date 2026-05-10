@@ -1,0 +1,60 @@
+spec:
+  name: wehance-pos
+  region: nyc
+  services:
+    - name: web
+      environment_slug: php
+      instance_count: 1
+      instance_size_slug: basic-xxs
+      http_port: 8080
+      run_command: php artisan migrate --force
+      routes:
+        - path: /
+      envs:
+        - key: APP_ENV
+          scope: RUN_AND_BUILD_TIME
+          value: production
+        - key: APP_DEBUG
+          scope: RUN_AND_BUILD_TIME
+          value: "false"
+        - key: LOG_CHANNEL
+          scope: RUN_AND_BUILD_TIME
+          value: stack
+        - key: APP_KEY
+          scope: RUN_TIME
+          type: SECRET
+        - key: APP_URL
+          scope: RUN_AND_BUILD_TIME
+          value: ${APP_URL}
+        - key: DB_CONNECTION
+          scope: RUN_AND_BUILD_TIME
+          value: mysql
+        - key: DB_HOST
+          scope: RUN_TIME
+          value: ${db.HOSTNAME}
+        - key: DB_PORT
+          scope: RUN_TIME
+          value: ${db.PORT}
+        - key: DB_DATABASE
+          scope: RUN_TIME
+          value: ${db.DATABASE}
+        - key: DB_USERNAME
+          scope: RUN_TIME
+          value: ${db.USERNAME}
+        - key: DB_PASSWORD
+          scope: RUN_TIME
+          value: ${db.PASSWORD}
+        - key: SESSION_DRIVER
+          scope: RUN_AND_BUILD_TIME
+          value: database
+        - key: CACHE_STORE
+          scope: RUN_AND_BUILD_TIME
+          value: database
+        - key: QUEUE_CONNECTION
+          scope: RUN_AND_BUILD_TIME
+          value: database
+  databases:
+    - name: db
+      engine: MYSQL
+      production: true
+      cluster_name: wehance-pos-db
