@@ -68,7 +68,7 @@ class RegisterController extends Controller
 
             app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
-            Auth::login($user);
+            Auth::login($user, $request->boolean('remember', true));
             $request->session()->regenerate();
         });
 

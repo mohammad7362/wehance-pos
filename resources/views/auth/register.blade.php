@@ -83,6 +83,12 @@
                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                     placeholder="********">
             </div>
+            <div class="flex items-center justify-between">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="remember" value="1" @checked(old('remember', true)) class="w-4 h-4 rounded border-white/30 bg-white/10 text-blue-500 focus:ring-blue-500">
+                    <span class="text-sm text-slate-300">{{ __('Remember me') }}</span>
+                </label>
+            </div>
             <button type="submit"
                 class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg
                        transition-colors duration-200 shadow-lg shadow-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-500">

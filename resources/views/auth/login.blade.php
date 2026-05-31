@@ -79,7 +79,7 @@
             </div>
             <div class="flex items-center justify-between">
                 <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" name="remember" class="w-4 h-4 rounded border-white/30 bg-white/10 text-blue-500 focus:ring-blue-500">
+                    <input type="checkbox" name="remember" value="1" @checked(old('remember', true)) class="w-4 h-4 rounded border-white/30 bg-white/10 text-blue-500 focus:ring-blue-500">
                     <span class="text-sm text-slate-300">{{ __('Remember me') }}</span>
                 </label>
             </div>
