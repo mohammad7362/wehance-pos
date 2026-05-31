@@ -103,7 +103,7 @@ class BranchList extends Component
             $ownerId = Auth::id();
             abort_unless($ownerId, 403);
 
-            $branch = Branch::create($data + ['created_by' => $ownerId]);
+            $branch = Branch::create($data);
             Auth::user()?->forceFill(['branch_id' => $branch->id])->save();
         }
 

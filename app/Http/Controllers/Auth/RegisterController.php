@@ -57,7 +57,7 @@ class RegisterController extends Controller
                 'email_verified_at' => now(),
             ])->save();
 
-            $branch = $this->createBranchWithUniqueCode($validated['name'], $validated['email'], $user->id);
+            $branch = $this->createBranchWithUniqueCode($validated['name'], $validated['email']);
 
             $user->forceFill([
                 'branch_id' => $branch->id,
@@ -75,7 +75,7 @@ class RegisterController extends Controller
         return redirect()->intended(route('dashboard'));
     }
 
-    private function createBranchWithUniqueCode(string $name, string $email, int $userId): Branch
+    private function createBranchWithUniqueCode(string $name, string $email): Branch
     {
         $base = strtoupper(Str::substr(preg_replace('/[^A-Za-z0-9]/', '', $name) ?: 'BRN', 0, 8));
 
@@ -88,7 +88,6 @@ class RegisterController extends Controller
                     'name' => $name . ' Branch',
                     'code' => $code,
                     'email' => $email,
-                    'created_by' => $userId,
                     'currency' => 'USD',
                     'currency_symbol' => '$',
                     'tax_rate' => 0,
