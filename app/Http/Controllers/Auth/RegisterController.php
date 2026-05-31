@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use App\Models\User;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -17,9 +17,6 @@ use Spatie\Permission\Models\Role;
 
 class RegisterController extends Controller
 {
-    /**
-     * Permissions required by sidebar and route gates.
-     */
     private const DEFAULT_PERMISSIONS = [
         'view dashboard',
         'view products', 'create products', 'edit products', 'delete products',
@@ -36,16 +33,6 @@ class RegisterController extends Controller
         'view branches', 'manage branches', 'manage settings',
     ];
 
-    /**
-     * Manager role excludes high-risk administration permissions.
-     */
-    private const MANAGER_BLOCKED_PERMISSIONS = [
-        'delete sales',
-        'manage branches',
-        'manage settings',
-        'view users', 'create users', 'edit users', 'delete users',
-    ];
-
     public function showRegistrationForm()
     {
         return view('auth.register');
@@ -60,21 +47,23 @@ class RegisterController extends Controller
         ]);
 
         DB::transaction(function () use ($validated, $request) {
-            $branch = $this->createBranchWithUniqueCode($validated['name'], $validated['email']);
-
             $user = new User();
             $user->forceFill([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
-                'branch_id' => $branch->id,
+                'branch_id' => null,
                 'is_active' => true,
                 'email_verified_at' => now(),
             ])->save();
 
-            $this->ensureRolesAndPermissions();
+            $branch = $this->createBranchWithUniqueCode($validated['name'], $validated['email'], $user->id);
 
-            // Public self-registration always gets super admin access.
+            $user->forceFill([
+                'branch_id' => $branch->id,
+            ])->save();
+
+            $this->ensureRolesAndPermissions();
             $user->syncRoles(['super_admin']);
 
             app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
@@ -86,7 +75,7 @@ class RegisterController extends Controller
         return redirect()->intended(route('dashboard'));
     }
 
-    private function createBranchWithUniqueCode(string $name, string $email): Branch
+    private function createBranchWithUniqueCode(string $name, string $email, int $userId): Branch
     {
         $base = strtoupper(Str::substr(preg_replace('/[^A-Za-z0-9]/', '', $name) ?: 'BRN', 0, 8));
 
@@ -99,6 +88,7 @@ class RegisterController extends Controller
                     'name' => $name . ' Branch',
                     'code' => $code,
                     'email' => $email,
+                    'created_by' => $userId,
                     'currency' => 'USD',
                     'currency_symbol' => '$',
                     'tax_rate' => 0,
@@ -106,7 +96,6 @@ class RegisterController extends Controller
                     'is_active' => true,
                 ]);
             } catch (UniqueConstraintViolationException $e) {
-                // Retry with next suffix when another request wins the same code.
                 if (! str_contains($e->getMessage(), 'branches_code_unique')) {
                     throw $e;
                 }
@@ -124,12 +113,5 @@ class RegisterController extends Controller
 
         $superAdmin = Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
         $superAdmin->syncPermissions(Permission::query()->get());
-
-        $manager = Role::firstOrCreate(['name' => 'manager', 'guard_name' => 'web']);
-        $manager->syncPermissions(
-            Permission::query()
-                ->whereNotIn('name', self::MANAGER_BLOCKED_PERMISSIONS)
-                ->get()
-        );
     }
 }
